@@ -1,0 +1,93 @@
+---
+title: "ExpectedDensityEtAl"
+author: "Steven M. Goodreau"
+date: "March 7, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ergm)
+```
+
+## Cross-sectional networks (ERGM parameters)
+
+Define 
+- $n$: # of nodes
+- $e$: # of edges
+- $y$: # of dyads
+- $d$: density
+- $m$: mean degree
+- $\theta$: edges coefficient
+
+We know:
+
+- $y = \frac{n(n-1)}{2}$
+
+- $d = \frac{e}{y} = \frac{2e}{n(n-1)}$
+
+- $m = \frac{2e}{n} = d(n-1)$ 
+
+- $\theta = ln(\frac{d}{1-d})$
+
+```{r}
+n <- 100
+e <- 45
+(y = n*(n-1)/2)
+(d <- e/y)
+(m = d*(n-1))
+(theta <- log(d/(1-d)))
+ergm(network.initialize(n, directed=FALSE)~edges, target.stats=e)$coef
+```
+
+
+## Dynamic networks (STERGM parameters)
+
+Define 
+- $n$: # of nodes
+- $e$: # of edges
+- $y$: # of dyads
+- $d$: density
+- $m$: mean degree
+- $\theta^{+}$: edges coefficient, formation model
+- $\theta^{-}$: edges coefficient, dissolution model
+- $r$: mean relational duration
+- $s$: dissolution probability per time step
+
+As before:
+
+- $y = \frac{n(n-1)}{2}$
+
+- $d = \frac{e}{y} = \frac{2e}{n(n-1)}$
+
+- $m = \frac{2e}{n} = d(n-1)$ 
+
+But now:
+
+- $r =   1/s$
+
+- $\theta^{-} = ln\frac{1-s}{s}$ and 
+$s = \frac{e^{\theta^{-}}}{1-e^{\theta^{-}}}$
+
+But what about edges/density/mean degree as a function of the two $\theta$ values?  We know that at equilibrium, the expected number of edges forming at each time step will equal the expected nmber dissolving, or:
+
+$es = (y-e)x$
+$es = yx - ex$
+$es + ex = yx$
+$e=(s+x)=yx$
+$e = y \frac{x}{s+x}$
+
+# of edges = # of dyads * (form_prob)/ (form_prob + diss_prob)
+
+$x = es/(y-e)$
+
+form prob = edges*diss_prob / nonties
+
+
+```{r formprob}
+s <- 0.01
+formprob <- e*s/(y-e)
+formlogit <- log(formprob/(1-formprob))
+stergm()
+
+```
